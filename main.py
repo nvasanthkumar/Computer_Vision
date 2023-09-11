@@ -2,10 +2,23 @@ from cvzone.HandTrackingModule import HandDetector
 import cv2
 import os
 import numpy as np
+import mediapipe as mp
+
+#helper functions
+def quit(lmList,lmList2):
+    safe = 60
+    dist, info = detectorHand.findDistance(lmList[5][0:2],lmList2[9][0:2])
+    print("DISTANCE IS : ",dist)
+
+    if dist<safe:
+        return True
+    return False
+
 
 # Parameters
 width, height = 1280, 720
 gestureThreshold = 300
+
 folderPath = "Presentation"
 
 # Camera Setup
@@ -18,7 +31,7 @@ detectorHand = HandDetector(detectionCon=0.8, maxHands=1)
 
 # Variables
 imgList = []
-delay = 20
+delay = 30
 buttonPressed = False
 counter = 0
 drawMode = False
@@ -53,8 +66,8 @@ while True:
         fingers = detectorHand.fingersUp(hand)  # List of which fingers are up
 
         # Constrain values for easier drawing
-        xVal = int(np.interp(lmList[8][0], [width // 2, width], [0, width]))
-        yVal = int(np.interp(lmList[8][1], [150, height - 150], [0, height]))
+        xVal = int(np.interp(lmList[8][0], [0, 700], [0, width]))
+        yVal = int(np.interp(lmList[8][1], [150, height-150], [0, height]))
         indexFinger = xVal, yVal
 
         if cy <= gestureThreshold:  # If hand is at the height of the face
@@ -83,8 +96,9 @@ while True:
                 annotationStart = True
                 annotationNumber += 1
                 annotations.append([])
-            print(annotationNumber)
+            # print(annotationNumber)
             annotations[annotationNumber].append(indexFinger)
+            print(lmList[8])
             cv2.circle(imgCurrent, indexFinger, 12, (0, 0, 255), cv2.FILLED)
 
         else:
@@ -120,6 +134,3 @@ while True:
     key = cv2.waitKey(1)
     if key == ord('q'):
         break
-
-cap.release()
-cv2.destroyAllWindows()
